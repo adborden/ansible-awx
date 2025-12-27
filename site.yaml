@@ -139,6 +139,13 @@
               body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** has timed out. {{ workflow_url }}"}{% endraw %}'
         state: present
 
+    - name: Add custom execution environment
+      awx.awx.execution_environment:
+        name: "ansible-awx"
+        image: "ghcr.io/adborden/ansible-awx:latest"
+        organization: "{{ awx_organization }}"
+        state: present
+
     - name: Create a Job Template with Webhook
       awx.awx.job_template:
         name: "Webhook Demo Job Template"
@@ -146,7 +153,7 @@
         inventory: "bayo vista"
         playbook: "hello.yml"
         webhook_service: github
-        state: present
+        state: absent
 
     - name: Create ansible-awx job template
       awx.awx.job_template:
@@ -154,6 +161,7 @@
         project: "awx-configuration"
         inventory: "bayo vista"
         playbook: "site.yaml"
+        execution_environment: ansible-awx
         credentials:
           - AWX admin
         webhook_service: github

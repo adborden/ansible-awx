@@ -1,7 +1,11 @@
-.PHONY: check setup run
+.PHONY: build check setup run
 
 setup:
 	poetry install
+
+build:
+	poetry export -f requirements.txt --output requirements.txt
+	poetry run ansible-builder build --tag ghcr.io/adborden/ansible-awx:latest
 
 check:
 	poetry run ansible-playbook site.yaml --check

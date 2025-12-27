@@ -1,2 +1,4 @@
+context/
 .secrets/
 secrets/
+requirements.txt
