@@ -5,63 +5,51 @@
   gather_facts: false
 
   vars:
-    awx_hostname: https://awx.fl.a14n.net
-    awx_token: "YOUR_AWX_TOKEN"
     awx_organization: "Default"
-    git_repo_url: "git@github.com:adborden/ansible-awx.git"
+    git_repo_url: "https://github.com/adborden/ansible-awx.git"
 
   tasks:
-    - name: Create user adborden
-      awx.awx.user:
-        controller_host: "{{ awx_hostname }}"
-        controller_oauthtoken: "{{ awx_token }}"
-        username: adborden
-        first_name: "Aaron"
-        last_name: "Borden"
-        email: "adborden@a14n.net"
-        is_superuser: true
-        password: "{{ user_password }}"
-        update_secrets: false
+    - name: Create AWX admin token credential
+      awx.awx.credential:
+        name: "AWX admin"
+        organization: "{{ awx_organization }}"
+        credential_type: "AWX token"
+        inputs:
+          awx_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+          awx_token: "{{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
         state: present
-        # Note: You'll need to set the password for this user manually in the AWX UI.
 
     - name: Create Project
       awx.awx.project:
-        controller_host: "{{ awx_hostname }}"
-        controller_oauthtoken: "{{ awx_token }}"
-        name: awx-configuration
+        name: "awx-configuration"
         organization: "{{ awx_organization }}"
         scm_type: git
         scm_url: "{{ git_repo_url }}"
-        scm_branch: main
+        scm_branch: feature/awx
         state: present
 
     - name: Create Inventory
       awx.awx.inventory:
-        controller_host: "{{ awx_hostname }}"
-        controller_oauthtoken: "{{ awx_token }}"
-        name: bayo vista
+        name: "bayo vista"
         organization: "{{ awx_organization }}"
         state: present
 
-    #- name: Create Webhook Credential
-    #  awx.awx.credential:
-    #    controller_host: "{{ awx_hostname }}"
-    #    controller_oauthtoken: "{{ awx_token }}"
-    #    name: "GitHub Webhook Credential"
-    #    organization: "{{ awx_organization }}"
-    #    credential_type: Webhook
-    #    state: present
-
     - name: Create a Job Template with Webhook
       awx.awx.job_template:
-        controller_host: "{{ awx_hostname }}"
-        controller_oauthtoken: "{{ awx_token }}"
         name: "Webhook Demo Job Template"
         project: "awx-configuration"
-        inventory: bayo vista
+        inventory: "bayo vista"
         playbook: "hello.yml"
         webhook_service: github
-        #webhook_credential: "GitHub Webhook Credential"
         state: present
 
+    - name: Create ansible-awx job template
+      awx.awx.job_template:
+        name: "apply awx-configuration"
+        project: "awx-configuration"
+        inventory: "bayo vista"
+        playbook: "site.yaml"
+        credentials:
+          - AWX admin
+        webhook_service: github
+        state: present
