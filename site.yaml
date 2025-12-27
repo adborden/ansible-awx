@@ -144,6 +144,7 @@
         name: "ansible-awx"
         image: "ghcr.io/adborden/ansible-awx:latest"
         organization: "{{ awx_organization }}"
+        pull: always
         state: present
 
     - name: Create a Job Template with Webhook
@@ -165,4 +166,12 @@
         credentials:
           - AWX admin
         webhook_service: github
+        state: present
+
+    - name: Add daily schedule for 'apply awx-configuration'
+      awx.awx.schedule:
+        name: "Daily run of apply awx-configuration"
+        unified_job_template: "apply awx-configuration"
+        rrule: >-
+          DTSTART;TZID=America/Los_Angeles:20251227T210000 RRULE:FREQ=DAILY;INTERVAL=1;WKST=SU;BYHOUR=13;BYMINUTE=30;BYSECOND=0
         state: present
