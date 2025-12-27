@@ -7,4 +7,4 @@ check:
 	poetry run ansible-playbook site.yaml --check
 
 run:
-	poetry run ansible-playbook site.yaml --extra-vars @secrets/vars.yaml
+	poetry run ansible-playbook site.yaml

@@ -9,6 +9,31 @@
     git_repo_url: "https://github.com/adborden/ansible-awx.git"
 
   tasks:
+    - name: Create the 'AWX token' credential type
+      awx.awx.credential_type:
+        name: "AWX token"
+        description: "API token for communicating with AWX"
+        kind: cloud
+        inputs:
+          fields:
+            - id: "awx_host"
+              label: "AWX Host"
+              type: "string"
+              help_text: "The URL of the AWX instance (e.g., https://awx.example.org)"
+            - id: "awx_token"
+              label: "AWX Token"
+              type: "string"
+              secret: true
+              help_text: "The AWX OAuth2 token."
+          required:
+            - "awx_host"
+            - "awx_token"
+        injectors:
+          env:
+            CONTROLLER_HOST: "{{ '{{' }}awx_host{{ '}}' }}"
+            CONTROLLER_OAUTH_TOKEN: "{{ '{{' }}awx_token{{ '}}' }}"
+        state: present
+
     - name: Create AWX admin token credential
       awx.awx.credential:
         name: "AWX admin"
@@ -32,6 +57,26 @@
       awx.awx.inventory:
         name: "bayo vista"
         organization: "{{ awx_organization }}"
+        state: present
+
+    - name: Create raspberry-pi group
+      awx.awx.group:
+        name: raspberry-pi
+        inventory: bayo vista
+        organization: "{{ awx_organization }}"
+        state: present
+
+    - name: Add host 'blue' to inventory 'bayo vista'
+      awx.awx.host:
+        name: "blue"
+        inventory: "bayo vista"
+        organization: "{{ awx_organization }}"
+        groups:
+          - raspberry-pi
+        variables:
+          ansible_connection: ssh
+          ansible_user: ubuntu
+          ansible_host: blue.lan
         state: present
 
     - name: Create a Job Template with Webhook
