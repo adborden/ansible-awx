@@ -59,24 +59,84 @@
         organization: "{{ awx_organization }}"
         state: present
 
-    - name: Create raspberry-pi group
-      awx.awx.group:
-        name: raspberry-pi
-        inventory: bayo vista
-        organization: "{{ awx_organization }}"
-        state: present
-
     - name: Add host 'blue' to inventory 'bayo vista'
       awx.awx.host:
         name: "blue"
         inventory: "bayo vista"
-        organization: "{{ awx_organization }}"
-        groups:
-          - raspberry-pi
         variables:
           ansible_connection: ssh
           ansible_user: ubuntu
           ansible_host: blue.lan
+        state: present
+
+    #- name: Create raspberry-pi group
+    #  awx.awx.group:
+    #    name: raspberry-pi
+    #    inventory: bayo vista
+    #    hosts:
+    #      - blue
+    #    state: present
+
+    - name: Create Discord notifier
+      awx.awx.notification_template:
+        name: "discord"
+        description: "RocketSOL"
+        organization: "{{ awx_organization }}"
+        notification_type: "webhook"
+        notification_configuration:
+          url: "https://discord.com/api/webhooks/1454526915913449555/q85-VdvqKJGxANQSBaaX641dtgZXeHv-ULu1vJWxIlQzY-sw9yN-ecdSQXzLxAzoI7F8"
+          headers: {}
+          http_method: "POST"
+          disable_ssl_verification: false
+        messages:
+          error:
+            body: |
+              {% raw %}{
+                "content": ":exclamation: Job **{{ job.name }}** failed after {{ job.elapsed }}s.",
+                "embeds": [
+                  {
+                    "title": "Job #{{ job.id }} - {{ job.status }}",
+                    "description": "{{ job.name }}",
+                    "url": "{{ url }}",
+                    "color": 15297910
+                  }
+                ]
+              }{% endraw %}
+          started:
+            body: |
+              {% raw %}{
+                "content": ":arrows_clockwise: Job **{{ job.name }}** is running.",
+                "embeds": [
+                  {
+                    "title": "Job #{{ job.id }} - {{ job.status }}",
+                    "description": "{{ job.name }}",
+                    "url": "{{ url }}",
+                    "color": 3447003
+                  }
+                ]
+              }{% endraw %}
+          success:
+            body: |
+              {% raw %}{
+                "content": ":white_check_mark: Job **{{ job.name }}** completed successfully after {{ job.elapsed }}s.",
+                "embeds": [
+                  {
+                    "title": "Job #{{ job.id }} - {{ job.status }}",
+                    "description": "{{ job.name }}",
+                    "url": "{{ url }}",
+                    "color": 1621586
+                  }
+                ]
+              }{% endraw %}
+          workflow_approval:
+            denied:
+              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** was denied. {{ workflow_url }}"}{% endraw %}'
+            running:
+              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** needs review. This node can be viewed at: {{ workflow_url }}"}{% endraw %}'
+            approved:
+              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** was approved. {{ workflow_url }}"}{% endraw %}'
+            timed_out:
+              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** has timed out. {{ workflow_url }}"}{% endraw %}'
         state: present
 
     - name: Create a Job Template with Webhook
