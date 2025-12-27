@@ -1,0 +1,19 @@
+[project]
+name = "awx-configuration"
+version = "0.1.0"
+description = "AWX configuration as code."
+authors = [
+    {name = "Aaron D Borden",email = "adborden@a14n.net"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ansible (>=13.1.0,<14.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
