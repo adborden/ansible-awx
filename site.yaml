@@ -78,6 +78,24 @@
             CONTROLLER_OAUTH_TOKEN: "{{ '{{' }}awx_token{{ '}}' }}"
         state: present
 
+    - name: Create the 'Discord webhook' credential type
+      awx.awx.credential_type:
+        name: Discord webhook
+        description: Discord webhook URL
+        kind: cloud
+        inputs:
+          fields:
+            - id: discord_webhook_url
+              label: AWX Host
+              type: string
+              help_text: The URL of the AWX instance (e.g., https://awx.example.org)
+          required:
+            - discord_webhook_url
+        injectors:
+          extra_vars:
+            discord_webhook_url: "{% raw %}{{ discord_webhook_url }}{% endraw %}"
+        state: present
+
     - name: Create AWX admin token credential
       awx.awx.credential:
         name: "AWX admin"
@@ -86,6 +104,15 @@
         inputs:
           awx_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
           awx_token: "{{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
+        state: present
+
+    - name: Create Discord webhook credential
+      awx.awx.credential:
+        name: Discord webhook
+        organization: "{{ awx_organization }}"
+        credential_type: Discord webhook
+        inputs:
+          discord_webhook_url: "{{ discord_webhook_url }}"
         state: present
 
     - name: Create Project
@@ -113,13 +140,13 @@
           ansible_host: blue.lan
         state: present
 
-    #- name: Create raspberry-pi group
-    #  awx.awx.group:
-    #    name: raspberry-pi
-    #    inventory: bayo vista
-    #    hosts:
-    #      - blue
-    #    state: present
+    - name: Create raspberry-pi group
+      awx.awx.group:
+        name: raspberry-pi
+        inventory: bayo vista
+        hosts:
+          - blue
+        state: present
 
     - name: Create Discord notifier
       awx.awx.notification_template:
@@ -128,7 +155,7 @@
         organization: "{{ awx_organization }}"
         notification_type: "webhook"
         notification_configuration:
-          url: "https://discord.com/api/webhooks/1454526915913449555/q85-VdvqKJGxANQSBaaX641dtgZXeHv-ULu1vJWxIlQzY-sw9yN-ecdSQXzLxAzoI7F8"
+          url: "{{ discord_webhook_url }}"
           headers: {}
           http_method: "POST"
           disable_ssl_verification: false
@@ -176,6 +203,7 @@
         execution_environment: ansible-awx
         credentials:
           - AWX admin
+          - Discord webhook
         webhook_service: github
         state: present
 
