@@ -90,7 +90,7 @@
           disable_ssl_verification: false
         messages:
           error:
-            body: >
+            body: |
               {
                 "content": ":exclamation: Job **{{ '{{' }} job.name {{ '}}' }}** failed after {{ '{{' }} job.elapsed {{ '}}' }}s.",
                 "embeds": [
@@ -103,7 +103,7 @@
                 ]
               }
           started:
-            body: >
+            body: |
               {
                 "content": ":arrows_clockwise: Job **{{ '{{' }} job.name {{ '}}' }}** is running.",
                 "embeds": [
@@ -116,7 +116,7 @@
                 ]
               }
           success:
-            body: >
+            body: |
               {
                 "content": ":white_check_mark: Job **{{ '{{' }} job.name {{ '}}' }}** completed successfully after {{ '{{' }} job.elapsed {{ '}}' }}s.",
                 "embeds": [
@@ -130,16 +130,16 @@
               }
           workflow_approval:
             denied:
-              body: >-
+              body: |
                 {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was denied. {{ '{{' }} workflow_url {{ '}}' }}"}
             running:
-              body: >-
+              body: |
                 {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" needs review. This node can be viewed at: {{ '{{' }} workflow_url {{ '}}' }}"}
             approved:
-              body: >-
+              body: |
                 {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was approved. {{ '{{' }} workflow_url {{ '}}' }}"}
             timed_out:
-              body: >-
+              body: |
                 {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" has timed out. {{ '{{' }} workflow_url {{ '}}' }}"}
         state: present
 
