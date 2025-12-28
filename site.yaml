@@ -7,6 +7,50 @@
   vars:
     awx_organization: "Default"
     git_repo_url: "https://github.com/adborden/ansible-awx.git"
+    discord_error_body: |-
+      {
+        "content": ":exclamation: Job **{{ '{{' }} job.name {{ '}}' }}** failed after {{ '{{' }} job.elapsed {{ '}}' }}s.",
+        "embeds": [
+          {
+            "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
+            "description": "{{ '{{' }} job.name {{ '}}' }}",
+            "url": "{{ '{{' }} url {{ '}}' }}",
+            "color": 15297910
+          }
+        ]
+      }
+    discord_started_body: |-
+      {
+        "content": ":arrows_clockwise: Job **{{ '{{' }} job.name {{ '}}' }}** is running.",
+        "embeds": [
+          {
+            "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
+            "description": "{{ '{{' }} job.name {{ '}}' }}",
+            "url": "{{ '{{' }} url {{ '}}' }}",
+            "color": 3447003
+          }
+        ]
+      }
+    discord_success_body: |-
+      {
+        "content": ":white_check_mark: Job **{{ '{{' }} job.name {{ '}}' }}** completed successfully after {{ '{{' }} job.elapsed {{ '}}' }}s.",
+        "embeds": [
+          {
+            "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
+            "description": "{{ '{{' }} job.name {{ '}}' }}",
+            "url": "{{ '{{' }} url {{ '}}' }}",
+            "color": 1621586
+          }
+        ]
+      }
+    discord_wf_denied_body: |-
+      {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was denied. {{ '{{' }} workflow_url {{ '}}' }}"}
+    discord_wf_running_body: |-
+      {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" needs review. This node can be viewed at: {{ '{{' }} workflow_url {{ '}}' }}"}
+    discord_wf_approved_body: |-
+      {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was approved. {{ '{{' }} workflow_url {{ '}}' }}"}
+    discord_wf_timed_out_body: |-
+      {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" has timed out. {{ '{{' }} workflow_url {{ '}}' }}"}
 
   tasks:
     - name: Create the 'AWX token' credential type
@@ -90,57 +134,20 @@
           disable_ssl_verification: false
         messages:
           error:
-            body: |
-              {
-                "content": ":exclamation: Job **{{ '{{' }} job.name {{ '}}' }}** failed after {{ '{{' }} job.elapsed {{ '}}' }}s.",
-                "embeds": [
-                  {
-                    "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
-                    "description": "{{ '{{' }} job.name {{ '}}' }}",
-                    "url": "{{ '{{' }} url {{ '}}' }}",
-                    "color": 15297910
-                  }
-                ]
-              }
+            body: "{{ discord_error_body | to_json }}"
           started:
-            body: |
-              {
-                "content": ":arrows_clockwise: Job **{{ '{{' }} job.name {{ '}}' }}** is running.",
-                "embeds": [
-                  {
-                    "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
-                    "description": "{{ '{{' }} job.name {{ '}}' }}",
-                    "url": "{{ '{{' }} url {{ '}}' }}",
-                    "color": 3447003
-                  }
-                ]
-              }
+            body: "{{ discord_started_body | to_json }}"
           success:
-            body: |
-              {
-                "content": ":white_check_mark: Job **{{ '{{' }} job.name {{ '}}' }}** completed successfully after {{ '{{' }} job.elapsed {{ '}}' }}s.",
-                "embeds": [
-                  {
-                    "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
-                    "description": "{{ '{{' }} job.name {{ '}}' }}",
-                    "url": "{{ '{{' }} url {{ '}}' }}",
-                    "color": 1621586
-                  }
-                ]
-              }
+            body: "{{ discord_success_body | to_json }}"
           workflow_approval:
             denied:
-              body: |
-                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was denied. {{ '{{' }} workflow_url {{ '}}' }}"}
+              body: "{{ discord_wf_denied_body | to_json }}"
             running:
-              body: |
-                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" needs review. This node can be viewed at: {{ '{{' }} workflow_url {{ '}}' }}"}
+              body: "{{ discord_wf_running_body | to_json }}"
             approved:
-              body: |
-                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was approved. {{ '{{' }} workflow_url {{ '}}' }}"}
+              body: "{{ discord_wf_approved_body | to_json }}"
             timed_out:
-              body: |
-                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" has timed out. {{ '{{' }} workflow_url {{ '}}' }}"}
+              body: "{{ discord_wf_timed_out_body | to_json }}"
         state: present
 
     - name: Add custom execution environment
@@ -179,3 +186,4 @@
         rrule: >-
           DTSTART;TZID=America/Los_Angeles:20251227T210000 RRULE:FREQ=DAILY;INTERVAL=1;WKST=SU;BYHOUR=13;BYMINUTE=30;BYSECOND=0
         state: present
+
