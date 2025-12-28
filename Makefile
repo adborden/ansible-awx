@@ -4,7 +4,7 @@ setup:
 	poetry install
 
 build:
-	poetry export -f requirements.txt --output requirements.txt
+	poetry export -f requirements.txt --output requirements.txt --without-hashes
 	poetry run ansible-builder build --tag ghcr.io/adborden/ansible-awx:latest
 
 check:

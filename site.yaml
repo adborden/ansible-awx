@@ -90,53 +90,57 @@
           disable_ssl_verification: false
         messages:
           error:
-            body: |
-              {% raw %}{
-                "content": ":exclamation: Job **{{ job.name }}** failed after {{ job.elapsed }}s.",
+            body: >
+              {
+                "content": ":exclamation: Job **{{ '{{' }} job.name {{ '}}' }}** failed after {{ '{{' }} job.elapsed {{ '}}' }}s.",
                 "embeds": [
                   {
-                    "title": "Job #{{ job.id }} - {{ job.status }}",
-                    "description": "{{ job.name }}",
-                    "url": "{{ url }}",
+                    "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
+                    "description": "{{ '{{' }} job.name {{ '}}' }}",
+                    "url": "{{ '{{' }} url {{ '}}' }}",
                     "color": 15297910
                   }
                 ]
-              }{% endraw %}
+              }
           started:
-            body: |
-              {% raw %}{
-                "content": ":arrows_clockwise: Job **{{ job.name }}** is running.",
+            body: >
+              {
+                "content": ":arrows_clockwise: Job **{{ '{{' }} job.name {{ '}}' }}** is running.",
                 "embeds": [
                   {
-                    "title": "Job #{{ job.id }} - {{ job.status }}",
-                    "description": "{{ job.name }}",
-                    "url": "{{ url }}",
+                    "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
+                    "description": "{{ '{{' }} job.name {{ '}}' }}",
+                    "url": "{{ '{{' }} url {{ '}}' }}",
                     "color": 3447003
                   }
                 ]
-              }{% endraw %}
+              }
           success:
-            body: |
-              {% raw %}{
-                "content": ":white_check_mark: Job **{{ job.name }}** completed successfully after {{ job.elapsed }}s.",
+            body: >
+              {
+                "content": ":white_check_mark: Job **{{ '{{' }} job.name {{ '}}' }}** completed successfully after {{ '{{' }} job.elapsed {{ '}}' }}s.",
                 "embeds": [
                   {
-                    "title": "Job #{{ job.id }} - {{ job.status }}",
-                    "description": "{{ job.name }}",
-                    "url": "{{ url }}",
+                    "title": "Job #{{ '{{' }} job.id {{ '}}' }} - {{ '{{' }} job.status {{ '}}' }}",
+                    "description": "{{ '{{' }} job.name {{ '}}' }}",
+                    "url": "{{ '{{' }} url {{ '}}' }}",
                     "color": 1621586
                   }
                 ]
-              }{% endraw %}
+              }
           workflow_approval:
             denied:
-              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** was denied. {{ workflow_url }}"}{% endraw %}'
+              body: >-
+                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was denied. {{ '{{' }} workflow_url {{ '}}' }}"}
             running:
-              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** needs review. This node can be viewed at: {{ workflow_url }}"}{% endraw %}'
+              body: >-
+                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" needs review. This node can be viewed at: {{ '{{' }} workflow_url {{ '}}' }}"}
             approved:
-              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** was approved. {{ workflow_url }}"}{% endraw %}'
+              body: >-
+                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" was approved. {{ '{{' }} workflow_url {{ '}}' }}"}
             timed_out:
-              body: '{% raw %}{"content": "The approval node **{{ approval_node_name }}** has timed out. {{ workflow_url }}"}{% endraw %}'
+              body: >-
+                {"content": "The approval node \"{{ '{{' }} approval_node_name {{ '}}' }}\" has timed out. {{ '{{' }} workflow_url {{ '}}' }}"}
         state: present
 
     - name: Add custom execution environment
